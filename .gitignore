@@ -3,4 +3,5 @@ target
 helix-term/rustfmt.toml
 result
 runtime/grammars
+runtime/queries
 .devenv
