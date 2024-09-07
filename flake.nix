@@ -191,6 +191,6 @@
     };
 
   nixConfig = {
-    extra-substituters = ["https://linuxing3.cachix.org"];
-    extra-trusted-public-keys = ["linuxing3.cachix.org-1:IpwG3iKqyxrlckXgsjGmjpC8w1G9BK3xEUM1IDXHaKM="];  };
+    extra-substituters = ["https://helix.cachix.org"];
+    extra-trusted-public-keys = ["helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="];  };
 }
