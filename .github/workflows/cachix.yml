@@ -15,12 +15,18 @@ jobs:
 
     - name: Install nix
       uses: cachix/install-nix-action@V27
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
 
-    - name: Authenticate with Cachix
+    - name: Auth with Cachix
       uses: cachix/cachix-action@v15
       with:
-        name: helix
+        name: linuxing3
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        signingKey: ${{ secrets.CACHIX_SIGNING_KEY }}
+
+    # - name: Binary cache with Cachix
+    #   uses: DeterminateSystems/magic-nix-cache-action@v2
 
     - name: Build nix flake
       run: nix build -L
