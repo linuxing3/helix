@@ -55,12 +55,18 @@ jobs:
             target: x86_64-pc-windows-msvc
             cross: false
             skip_tests: true  # x86_64 
-          - build: x86_64-linux
-            os: ubuntu-latest
+          - build: win32-msvc
+            os: windows-2019
             rust: stable
-            target: x86_64-unknown-linux-gnu
+            target: i686-pc-windows-msvc
             cross: false
-            skip_tests: true  # x86_64 
+            skip_tests: true
+        #  - build: x86_64-linux
+        #    os: ubuntu-latest
+        #    rust: stable
+        #    target: x86_64-unknown-linux-gnu
+        #    cross: false
+        #    skip_tests: true  # x86_64 
         # - build: aarch64-linux
         #   os: ubuntu-latest
         #   rust: stable
@@ -87,10 +93,7 @@ jobs:
         #   os: windows-2019
         #   rust: stable-x86_64-gnu
         #   target: x86_64-pc-windows-gnu
-        # - build: win32-msvc
-        #   os: windows-2019
-        #   rust: stable
-        #   target: i686-pc-windows-msvc
+
 
     steps:
       - name: Checkout sources
@@ -192,7 +195,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          if [ "${{ matrix.os }}" = "windows-2019" ]; then
+          if [ "${{ matrix.os }}" = "windows-2022" ]; then
             cp "target/${{ matrix.target }}/release/hx.exe" "dist/"
           else
             cp "target/${{ matrix.target }}/release/hx" "dist/"
