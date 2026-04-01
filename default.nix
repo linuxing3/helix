@@ -55,7 +55,8 @@ in
 
     buildType = "release";
 
-    name = with builtins; (fromTOML (readFile ./helix-term/Cargo.toml)).package.name;
+    pname = "efwmc-helix";
+    version = with builtins; (fromTOML (readFile ./Cargo.toml)).workspace.package.version;
     src = fs.toSource {
       root = ./.;
       fileset = src;
@@ -73,8 +74,9 @@ in
     # Sets the Helix runtime dir to the grammars
     env.HELIX_DEFAULT_RUNTIME = "${runtimeDir}";
 
-    # Get all the application stuff in the output directory.
+    # Rename the binary from hx to hxx to avoid conflicting with system helix
     postInstall = ''
+      mv $out/bin/hx $out/bin/hxx
       mkdir -p $out/lib
       installShellCompletion ${./contrib/completion}/hx.{bash,fish,zsh}
       mkdir -p $out/share/{applications,icons/hicolor/{256x256,scalable}/apps}
@@ -83,5 +85,5 @@ in
       cp ${./contrib/helix.png} $out/share/icons/hicolor/256x256/apps/helix.png
     '';
 
-    meta.mainProgram = "hx";
+    meta.mainProgram = "hxx";
   })

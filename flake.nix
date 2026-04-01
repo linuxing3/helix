@@ -1,5 +1,5 @@
 {
-  description = "A post-modern text editor.";
+  description = "efwmc-helix: A post-modern text editor with Steel plugin support.";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -9,62 +9,60 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    rust-overlay,
-    ...
-  }: let
-    inherit (nixpkgs) lib;
-    eachSystem = lib.genAttrs lib.systems.flakeExposed;
-    pkgsFor = eachSystem (system:
-      import nixpkgs {
-        localSystem.system = system;
-        overlays = [(import rust-overlay) self.overlays.helix];
+  outputs =
+    {
+      self,
+      nixpkgs,
+      rust-overlay,
+      ...
+    }:
+    let
+      inherit (nixpkgs) lib;
+      eachSystem = lib.genAttrs lib.systems.flakeExposed;
+      pkgsFor = eachSystem (
+        system:
+        import nixpkgs {
+          localSystem.system = system;
+          overlays = [
+            (import rust-overlay)
+            self.overlays.efwmc-helix
+          ];
+        }
+      );
+      gitRev = self.rev or self.dirtyRev or null;
+    in
+    {
+      packages = eachSystem (system: {
+        efwmc-helix = pkgsFor.${system}.efwmc-helix;
+        default = self.packages.${system}.efwmc-helix;
       });
-    gitRev = self.rev or self.dirtyRev or null;
-  in {
-    packages = eachSystem (system: {
-      inherit (pkgsFor.${system}) helix;
-      /*
-      The default Helix build. Uses the latest stable Rust toolchain, and unstable
-      nixpkgs.
-
-      The build inputs can be overridden with the following:
-
-      packages.${system}.default.override { rustPlatform = newPlatform; };
-
-      Overriding a derivation attribute can be done as well:
-
-      packages.${system}.default.overrideAttrs { buildType = "debug"; };
-      */
-      default = self.packages.${system}.helix;
-    });
-    checks =
-      lib.mapAttrs (system: pkgs: let
-        # Get Helix's MSRV toolchain to build with by default.
-        msrvToolchain = pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-        msrvPlatform = pkgs.makeRustPlatform {
-          cargo = msrvToolchain;
-          rustc = msrvToolchain;
-        };
-      in {
-        helix = self.packages.${system}.helix.override {
-          rustPlatform = msrvPlatform;
-        };
-      })
-      pkgsFor;
-
-    # Devshell behavior is preserved.
-    devShells =
-      lib.mapAttrs (system: pkgs: {
-        default = let
-          commonRustFlagsEnv = "-C link-arg=-fuse-ld=lld -C target-cpu=native --cfg tokio_unstable";
-          platformRustFlagsEnv = lib.optionalString pkgs.stdenv.isLinux "-Clink-arg=-Wl,--no-rosegment";
+      checks = lib.mapAttrs (
+        system: pkgs:
+        let
+          msrvToolchain = pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+          msrvPlatform = pkgs.makeRustPlatform {
+            cargo = msrvToolchain;
+            rustc = msrvToolchain;
+          };
         in
+        {
+          efwmc-helix = self.packages.${system}.efwmc-helix.override {
+            rustPlatform = msrvPlatform;
+          };
+        }
+      ) pkgsFor;
+
+      # Devshell behavior is preserved.
+      devShells = lib.mapAttrs (system: pkgs: {
+        default =
+          let
+            commonRustFlagsEnv = "-C link-arg=-fuse-ld=lld -C target-cpu=native --cfg tokio_unstable";
+            platformRustFlagsEnv = lib.optionalString pkgs.stdenv.isLinux "-Clink-arg=-Wl,--no-rosegment";
+          in
           pkgs.mkShell {
-            inputsFrom = [self.checks.${system}.helix];
-            nativeBuildInputs = with pkgs;
+            inputsFrom = [ self.checks.${system}.efwmc-helix ];
+            nativeBuildInputs =
+              with pkgs;
               [
                 lld
                 cargo-flamegraph
@@ -77,19 +75,24 @@
               export RUSTFLAGS="''${RUSTFLAGS:-""} ${commonRustFlagsEnv} ${platformRustFlagsEnv}"
             '';
           };
-      })
-      pkgsFor;
+      }) pkgsFor;
 
-    overlays = {
-      helix = final: prev: {
-        helix = final.callPackage ./default.nix {inherit gitRev;};
+      overlays = {
+        efwmc-helix = final: prev: {
+          efwmc-helix = final.callPackage ./default.nix { inherit gitRev; };
+        };
+
+        default = self.overlays.efwmc-helix;
       };
-
-      default = self.overlays.helix;
     };
-  };
   nixConfig = {
-    extra-substituters = ["https://helix.cachix.org"];
-    extra-trusted-public-keys = ["helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="];
+    extra-substituters = [
+      "https://helix.cachix.org"
+      "https://helix-steel-system.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
+      "helix-steel-system.cachix.org-1:l6e6SidE31VDBciOGFuOEM7h4v7Ll85DvDNODQLDl+Y="
+    ];
   };
 }
