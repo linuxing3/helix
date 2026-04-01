@@ -18,7 +18,7 @@
 
 ![Screenshot](./screenshot.png)
 
-A [Kakoune](https://github.com/mawww/kakoune) / [Neovim](https://github.com/neovim/neovim) inspired editor, written in Rust.
+A [Kakoune](https://github.com/mawww/kakoune) / [Neovim](https://github.com/neovim/neovim) inspired editor with steel plugin system, written in Rust.
 
 The editing model is very heavily based on Kakoune; during development I found
 myself agreeing with most of Kakoune's design decisions.
