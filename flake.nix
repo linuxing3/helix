@@ -87,11 +87,9 @@
     };
   nixConfig = {
     extra-substituters = [
-      "https://helix.cachix.org"
       "https://helix-steel-system.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "helix.cachix.org-1:ejp9KQpR1FBI2onstMQ34yogDm4OgU2ru6lIwPvuCVs="
       "helix-steel-system.cachix.org-1:l6e6SidE31VDBciOGFuOEM7h4v7Ll85DvDNODQLDl+Y="
     ];
   };
